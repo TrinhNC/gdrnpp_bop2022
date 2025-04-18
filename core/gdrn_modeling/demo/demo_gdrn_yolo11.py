@@ -6,7 +6,7 @@ PROJ_ROOT = osp.normpath(osp.join(cur_dir, "../../.."))
 sys.path.insert(0, PROJ_ROOT)
 print(PROJ_ROOT)
 
-# from predictor_yolo import YoloPredictor
+from predictor_yolo11 import YoloPredictor
 from predictor_gdrn import GdrnPredictor
 import os
 
@@ -43,35 +43,36 @@ def get_image_list(rgb_images_path, depth_images_path=None):
 
 
 if __name__ == "__main__":
-    image_paths = get_image_list(osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test1/rgb"), 
-                                 osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test1/depth"))
-    # yolo_predictor = YoloPredictor(
-    #                    exp_name="yolox-x",
-    #                    config_file_path=osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/configs/yolox/bop_pbr/yolox_x_640_augCozyAAEhsv_ranger_30_epochs_itodd_pbr_itodd_bop_test.py"),
-    #                    ckpt_file_path=osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/pretrained_models/yolox/yolox_x.pth"),
-    #                    fuse=True,
-    #                    fp16=False
-    #                  )
-    gdrn_predictor = GdrnPredictor(
-        config_file_path=osp.join(PROJ_ROOT,"configs/gdrn/ipdPbrSO/1.py"),
-        ckpt_file_path=osp.join(PROJ_ROOT,"output/gdrn/ipdPbrSO/1/model_0106709.pth"), #model_0092859.pth
-        camera_json_path=osp.join(PROJ_ROOT,"datasets/BOP_DATASETS/ipd/camera_cam1.json"),
-        path_to_obj_models=osp.join(PROJ_ROOT,"datasets/BOP_DATASETS/ipd/models")
+    image_paths = get_image_list(osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test4/rgb"), 
+                                 osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test4/depth"))
+
+    yolo_predictor = YoloPredictor(
+        model_path="/home/robodev/Documents/BPC/bpc_baseline/runs/detect/yolo11n_50epoch-detection-obj_4/weights/best.pt",
+        conf=0.2,
+        iou=0.45
     )
-    gdrn_predictor.cls_names = ['obj_1', 'obj_1', 'obj_1', 'obj_1']
+    gdrn_predictor = GdrnPredictor(
+        config_file_path=osp.join(PROJ_ROOT,"configs/gdrn/ipdPbrSO/4.py"),
+        ckpt_file_path=osp.join(PROJ_ROOT,"output/gdrn/ipdPbrSO/4/model_0133289.pth"), # output/gdrn/ipdPbrSO/0/model_0092859.pth
+        camera_json_path=osp.join(PROJ_ROOT,"datasets/BOP_DATASETS/ipd/camera_cam1.json"),
+        path_to_obj_models=osp.join(PROJ_ROOT,"datasets/BOP_DATASETS/ipd/models_eval")
+    )
 
     for rgb_img, depth_img in image_paths:
         rgb_img = cv2.imread(rgb_img)
+        # cv2.imshow("test", rgb_img)
+        # cv2.waitKey(0)
         if depth_img is not None:
             depth_img = cv2.imread(depth_img, 0)
-        # outputs = yolo_predictor.inference(image=rgb_img)
-        outputs = [427,472,250,221,1,1,0]
+        yolo_results = yolo_predictor.inference(image=rgb_img)
+        tensor_list = yolo_predictor.postprocess(yolo_results, num_classes=1, conf_thre=0.2, nms_thre=0.3)
+        # outputs = [427,472,250,221,1,1,0]
         # tensor_list = [torch.tensor([i],dtype=torch.float32) for i in outputs]  
         # tensor_list = [t.to('cuda') for t in tensor_list]
         # tensor_list = torch.stack(tensor_list)
         # tensor_list = torch.tensor([[[427., 472., 250., 221., 1., 1., 0.]]], device='cuda:0')
 
-        tensor_list = torch.tensor([[2263.62, 762.01, 2444.67, 861.78, 1., 1., 0.]], device='cuda:0')
+        # tensor_list = torch.tensor([[2263.62, 762.01, 2444.67, 861.78, 1., 1., 0.]], device='cuda:0')
         # [1704.39, 668.54, 1888.49, 834.40, 1., 1., 0.] 
         # [2014.41, 306.19, 2199.78, 475.12, 1., 1., 0.], 
         # [2367.34, 351.64, 2531.15, 487.81, 1., 1., 0.], 
@@ -82,4 +83,5 @@ if __name__ == "__main__":
         out_dict = gdrn_predictor.inference(data_dict)
         poses = gdrn_predictor.postprocessing(data_dict, out_dict)
         gdrn_predictor.gdrn_visualization(batch=data_dict, out_dict=out_dict, image=rgb_img)
+        print(poses)
 

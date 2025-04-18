@@ -31,6 +31,8 @@ from torch.cuda.amp import autocast
 from types import SimpleNamespace
 from setproctitle import setproctitle
 from mmcv import Config
+import matplotlib.pyplot as plt
+import warnings
 
 from core.gdrn_modeling.models import (
     GDRN,
@@ -73,8 +75,7 @@ class GdrnPredictor():
         self.objs_dir = path_to_obj_models
 
         #set your trained object names
-        self.objs = {1:'class_name_1',
-                     2:'class_name_2'}
+        self.objs = {0:'obj_1', 1:'obj_1',}
 
         self.cls_names = [i for i in self.objs.values()]
         self.obj_ids = [i for i in self.objs.keys()]
@@ -317,11 +318,15 @@ class GdrnPredictor():
         if outputs is None:
             # TODO set default output
             return None
+        # boxes = outputs.cpu()
+        print("DEBUGGG: ", outputs)
         boxes = outputs[0].cpu()
-
+        # print(boxes)
+        # print(len(boxes))
         for i in range(len(boxes)):
             annot_inst = {}
             box = boxes[i].tolist()
+            print(box)
             annot_inst["category_id"] = int(box[6])
             annot_inst["score"] = box[4] * box[5]
             annot_inst["bbox_est"] = [box[0], box[1], box[2], box[3]]
@@ -482,7 +487,9 @@ class GdrnPredictor():
         cur_extents = {}
         idx = 0
         for i, obj_name in self.objs.items():
-            model_path = os.path.join(self.objs_dir, f"obj_{i:06d}.ply")
+            #idx = 1 
+            #model_path = os.path.join(self.objs_dir, f"obj_{i:06d}.ply") #TODO Trinh
+            model_path = os.path.join(self.objs_dir, "obj_000004.ply")
             model = inout.load_ply(model_path, vertex_scale=self.args.vertex_scale)
             self.obj_models[i] = model
             pts = model["pts"]
@@ -603,28 +610,42 @@ class GdrnPredictor():
             )
             full_masks_np = full_masks_in_im.detach().to(torch.uint8).cpu().numpy()
 
+            labels_ = []
+            for i in range(bs):
+                obj_id = batch["cur_res"][i]["obj_id"]
+                labels_.append(self.cls_names[obj_id])
+
             img_vis_full_mask = vis_image_mask_bbox_cv2(
                 image,
                 [full_masks_np[i] for i in range(bs)],
                 [batch["bbox_est"][i].detach().cpu().numpy() for i in range(bs)],
-                labels=self.cls_names,
+                labels= labels_, #self.cls_names,
             )
 
             vis_dict[f"im_det_and_mask_full"] = img_vis_full_mask[:, :, ::-1]
 
         for i in range(bs):
+            obj_id = batch["cur_res"][i]["obj_id"]
             R = batch["cur_res"][i]["R"]
             t = batch["cur_res"][i]["t"]
             # pose_est = np.hstack([R, t.reshape(3, 1)])
-            proj_pts_est = misc.project_pts(self.obj_models[i+1]["pts"], self.cam, R, t)
+            proj_pts_est = misc.project_pts(self.obj_models[obj_id]["pts"], self.cam, R, t)
             mask_pose_est = misc.points2d_to_mask(proj_pts_est, im_H, im_W)
-            image_mask_pose_est = vis_image_mask_cv2(image, mask_pose_est, color="yellow" if i == 0 else "blue")
+            # image_mask_pose_est = vis_image_mask_cv2(image, mask_pose_est, color="yellow" if i == 0 else "blue")
+            image_mask_pose_est = vis_image_mask_cv2(image, mask_pose_est, color="green")
             image_mask_pose_est = vis_image_bboxes_cv2(
                 image_mask_pose_est,
                 [batch["bbox_est"][i].detach().cpu().numpy()],
-                labels=[self.cls_names[i]]
+                labels=[self.cls_names[obj_id]]
             )
             vis_dict[f"im_{i}_mask_pose_est"] = image_mask_pose_est[:, :, ::-1]
-        show_ims = np.hstack([cv2.cvtColor(_v, cv2.COLOR_BGR2RGB) for _k, _v in vis_dict.items()])
-        cv2.imshow('Main', show_ims)
-        cv2.waitKey(0)
+        # show_ims = np.hstack([cv2.cvtColor(_v, cv2.COLOR_BGR2RGB) for _k, _v in vis_dict.items()])
+        for _k, _v in vis_dict.items():
+            show_ims = cv2.cvtColor(_v, cv2.COLOR_BGR2RGB)
+            break
+        warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
+        print(show_ims.shape)
+        plt.imshow(show_ims)
+        plt.title("Pose Estimation Results")
+        # plt.axis('off')
+        plt.show()

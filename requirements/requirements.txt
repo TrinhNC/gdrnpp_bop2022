@@ -26,13 +26,13 @@ pypng
 imgaug>=0.4.0
 albumentations
 transforms3d
-# pyquaternion
-torchvision
+pyquaternion
+# torchvision
 open3d
 fvcore
 tensorboardX
 einops
-pytorch3d
+
 timm==0.6.7
 glfw
 imageio

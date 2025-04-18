@@ -191,6 +191,8 @@ class Lite(GDRN_Lite):
 
 @loguru_logger.catch
 def main(args):
+    # args.config_file = "/home/robodev/Documents/BPC/gdrnpp_bop2022/configs/gdrn/itodd_pbr/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_itodd.py"
+    # args.num_gpu = 0
     cfg = setup(args)
 
     logger.info(f"start to train with {args.num_machines} nodes and {args.num_gpus} GPUs")
@@ -224,6 +226,8 @@ if __name__ == "__main__":
         help="the strategy for parallel training: dp | ddp | ddp_spawn | deepspeed | ddp_sharded",
     )
     args = parser.parse_args()
+    # args.config_file = "gdrnpp_bop2022/configs/gdrn/ipdPbrSO/0.py"
+    # args.num_gpus = 0
     iprint("Command Line Args: {}".format(args))
 
     if args.eval_only and hard_limit < FILE_LIMIT:

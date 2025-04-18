@@ -1,4 +1,4 @@
-from collections import Sequence, defaultdict, deque
+from collections.abc import Sequence
 import cv2
 import mmcv
 import numpy as np

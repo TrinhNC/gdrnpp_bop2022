@@ -2,10 +2,7 @@
 
 This repo provides code and models for GDRNPP_BOP2022, **winner (most of the awards) of the BOP Challenge 2022 at ECCV'22 [[slides](http://cmp.felk.cvut.cz/sixd/workshop_2022/slides/bop_challenge_2022_results.pdf)]**.
 
-
-## News
-
-[18/03/2025] Our paper has been accepted by IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)! Paper is available at [[arXiv](https://arxiv.org/pdf/2102.12145)].
+pip install torch==2.0.0 torchvision==0.15.1 --index-url https://download.pytorch.org/whl/cu118
 
 ## Path Setting
 
@@ -69,7 +66,7 @@ Download the pretrained model at [Onedrive](https://mailstsinghuaeducn-my.sharep
 
 ## Pose Estimation
 
-The difference between this repo and GDR-Net (CVPR2021) mainly includes:
+The difference between this repo and GDR-Net (CVPR2021) mainly including:
 
 * Domain Randomization: We used stronger domain randomization operations than the conference version during training.
 * Network Architecture: We used a more powerful backbone Convnext rather than resnet-34,  and two  mask heads for predicting amodal mask and visible mask separately.
@@ -108,11 +105,13 @@ For iterative refinement, please checkout to the [pose_refine branch](https://gi
 If you use GDRNPP in your research, please use the following BibTeX entries.
 
 ```BibTeX
-@article{liu2025gdrnpp,
-  title     = {GDRNPP: A Geometry-guided and Fully Learning-based Object Pose Estimator},
-  author    = {Liu, Xingyu and Zhang, Ruida and Zhang, Chenyangguang and Wang, Gu and Tang, Jiwen and Li, Zhigang and Ji, Xiangyang},
-  journal   = {IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)},
-  year      = {2025},
+@misc{liu2022gdrnpp_bop,
+  author =       {Xingyu Liu and Ruida Zhang and Chenyangguang Zhang and 
+                  Bowen Fu and Jiwen Tang and Xiquan Liang and Jingyi Tang and 
+                  Xiaotian Cheng and Yukang Zhang and Gu Wang and Xiangyang Ji},
+  title =        {GDRNPP},
+  howpublished = {\url{https://github.com/shanice-l/gdrnpp_bop2022}},
+  year =         {2022}
 }
 
 @InProceedings{Wang_2021_GDRN,

@@ -43,8 +43,11 @@ def get_image_list(rgb_images_path, depth_images_path=None):
 
 
 if __name__ == "__main__":
-    image_paths = get_image_list(osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test1/rgb"), 
-                                 osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test1/depth"))
+    image_paths = get_image_list(osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test4/rgb"), 
+                                 osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test4/depth"))
+    import matplotlib.pyplot as plt
+    img = cv2.imread("/home/robodev/Documents/BPC/gdrnpp_bop2022/datasets/BOP_DATASETS/test4/rgb/000009_cam1_000000.png")
+    plt.imshow(img)
     # yolo_predictor = YoloPredictor(
     #                    exp_name="yolox-x",
     #                    config_file_path=osp.join(PROJ_ROOT,"/home/robodev/Documents/BPC/gdrnpp_bop2022/configs/yolox/bop_pbr/yolox_x_640_augCozyAAEhsv_ranger_30_epochs_itodd_pbr_itodd_bop_test.py"),
@@ -53,12 +56,12 @@ if __name__ == "__main__":
     #                    fp16=False
     #                  )
     gdrn_predictor = GdrnPredictor(
-        config_file_path=osp.join(PROJ_ROOT,"configs/gdrn/ipdPbrSO/1.py"),
-        ckpt_file_path=osp.join(PROJ_ROOT,"output/gdrn/ipdPbrSO/1/model_0106709.pth"), #model_0092859.pth
-        camera_json_path=osp.join(PROJ_ROOT,"datasets/BOP_DATASETS/ipd/camera_cam1.json"),
+        config_file_path=osp.join(PROJ_ROOT,"configs/gdrn/ipdPbrSO/4.py"),
+        ckpt_file_path=osp.join(PROJ_ROOT,"output/gdrn/ipdPbrSO/4/model_0044429.pth"),
+        camera_json_path=osp.join(PROJ_ROOT,"datasets/BOP_DATASETS/ipd/camera_cam2.json"),
         path_to_obj_models=osp.join(PROJ_ROOT,"datasets/BOP_DATASETS/ipd/models")
     )
-    gdrn_predictor.cls_names = ['obj_1', 'obj_1', 'obj_1', 'obj_1']
+    gdrn_predictor.cls_names = ['obj_0', 'obj_0', 'obj_0', 'obj_0']
 
     for rgb_img, depth_img in image_paths:
         rgb_img = cv2.imread(rgb_img)

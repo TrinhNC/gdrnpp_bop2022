@@ -8,6 +8,7 @@ import random
 import cv2
 import mmcv
 import numpy as np
+np.bool = np.bool_
 import pickle
 
 from core.utils.augment import AugmentRGB
@@ -115,8 +116,10 @@ class Base_DatasetFromList(data.Dataset):
 
     def _get_sample_dict(self, idx):
         if self._serialize:
-            start_addr = 0 if idx == 0 else self._addr[idx - 1].item()
-            end_addr = self._addr[idx].item()
+            # start_addr = 0 if idx == 0 else self._addr[idx - 1].item()
+            start_addr = 0 #TODO Trinh
+            # end_addr = self._addr[idx].item()
+            end_addr = self._addr[0].item()
             bytes = memoryview(self._lst[start_addr:end_addr])
             dataset_dict = pickle.loads(bytes)
         elif self._copy:
